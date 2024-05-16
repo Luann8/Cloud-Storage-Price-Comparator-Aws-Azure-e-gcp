@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Storage Price Comparator</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #014e324d;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .header {
+            background-color: #000000;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header img {
+            width: 50px;
+            height: 50px;
+            vertical-align: middle;
+        }
+
+        .header h1 {
+            display: inline-block;
+            margin: 0;
+            vertical-align: middle;
+        }
+
+        .main-content {
+            max-width: 800px;
+            margin: 50px auto;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .recomendacao {
+            margin-top: 20px;
+        }
+
+        .recomendacao p {
+            font-weight: bold;
+        }
+
+        .chart-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .footer {
+            background-color: #014e32;
+            color: #fff;
+            text-align: center;
+            padding: 10px;
+            clear: both; /* Clear the float */
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <img src="https://training.webasha.com/img/pass.png" alt="Logo">
+            <h1>Cloud Storage Price Comparator</h1>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="form-group">
+            <label for="armazenamento">Storage Quantity (GB):</label>
+            <input type="number" id="armazenamento" min="0" step="1">
+        </div>
+        <div class="form-group">
+            <label for="tempo">Usage Time (hours):</label>
+            <input type="number" id="tempo" min="0" step="1">
+        </div>
+        <button onclick="calculateRecommendation()">Calculate</button>
+
+        <div class="recomendacao" id="recomendacao"></div>
+
+        <div class="chart-container">
+            <canvas id="chartContainer"></canvas>
+            <button id="downloadButton">Download Chart</button>
+        </div>
+
+        <div>
+            <h2>1. Price:</h2>
+            <p>Google Cloud: Often stands out as the cheapest option, especially for storage and bandwidth.</p>
+            <p>Azure: Generally ranks second in price, with some advantages over AWS for certain services.</p>
+            <p>AWS: Historically the most expensive, but offers competitive discounts and a wide variety of instances to optimize costs.</p>
+        </div>
+
+        <h2>2. Features:</h2>
+        <p>AWS: Has the widest range of services and resources available, catering to the most complex needs.</p>
+        <p>Azure: Strong integration with Microsoft tools and technologies, ideal for those already using the ecosystem.</p>
+        <p>Google Cloud: Stands out in artificial intelligence, machine learning, and data analytics, with innovative tools.</p>
+
+        <h2>3. Ease of Use:</h2>
+        <p>Google Cloud: User-friendly and intuitive interface, considered by many as the easiest to use.</p>
+        <p>Azure: Familiar experience for Windows users and users of other Microsoft tools.</p>
+        <p>AWS: Slightly steeper learning curve, but with a large number of resources to assist in usage.</p>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2024 Cloud Storage Price Comparator.</p>
+        <p>Luann Pereira Mendes.</p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var ctx = document.getElementById('chartContainer').getContext('2d');
+
+            var chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['AWS', 'Azure', 'Google Cloud'],
+                    datasets: [{
+                        label: 'Total Storage Cost',
+                        backgroundColor: ['#ff6384', '#36a2eb', '#ffce56'],
+                        data: [0, 0, 0] // Initialize chart data with zero
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Total Cost (USD)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            document.getElementById('downloadButton').addEventListener('click', function () {
+                var url = chart.toBase64Image();
+                var link = document.createElement('a');
+                link.download = 'price_chart.png';
+                link.href = url;
+                link.click();
+            });
+        });
+
+        function calculateRecommendation() {
+            var storage = parseFloat(document.getElementById("armazenamento").value);
+            var time = parseFloat(document.getElementById("tempo").value);
+
+            if (isNaN(storage) || storage <= 0 || isNaN(time) || time <= 0) {
+                document.getElementById("recomendacao").innerHTML = "<p>Please enter valid values for storage and usage time.</p>";
+                return;
+            }
+
+            var aws_price = 0.052;
+            var azure_price = 0.056;
+            var gcp_price = 0.047;
+
+            var aws_cost = storage * aws_price * time;
+            var azure_cost = storage * azure_price * time;
+            var gcp_cost = storage * gcp_price * time;
+
+            var recommendation = "";
+
+            if (aws_cost < azure_cost && aws_cost < gcp_cost) {
+                recommendation = "AWS";
+            } else if (azure_cost < aws_cost && azure_cost < gcp_cost) {
+                recommendation = "Azure";
+            } else {
+                recommendation = "Google Cloud";
+            }
+
+            document.getElementById("recomendacao").innerHTML = "<p>Based on the entered storage quantity and usage time, we recommend using: " + recommendation + "</p>";
+
+            // Update chart data
+            var chart = Chart.getChart("chartContainer");
+            chart.data.datasets[0].data = [aws_cost, azure_cost, gcp_cost];
+            chart.update();
+        }
+    </script>
+</body>
+</html>
